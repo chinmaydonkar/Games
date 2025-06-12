@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Simple XO Game</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; }
+        .board { display: grid; grid-template-columns: repeat(3, 80px); gap: 5px; justify-content: center; margin-top: 40px; }
+        .cell {
+            width: 80px; height: 80px; font-size: 2em; 
+            display: flex; align-items: center; justify-content: center;
+            background: #f0f0f0; cursor: pointer; border: 1px solid #ccc;
+        }
+        .cell.winner { background: #90ee90; }
+        #status { margin-top: 20px; font-size: 1.2em; }
+        button { margin-top: 20px; padding: 8px 16px; font-size: 1em; }
+    </style>
+</head>
+<body>
+    <h1>XO Game</h1>
+    <div class="board" id="board"></div>
+    <div id="status"></div>
+    <button onclick="resetGame()">Restart</button>
+    <script>
+        const boardElem = document.getElementById('board');
+        const statusElem = document.getElementById('status');
+        let board = Array(9).fill('');
+        let currentPlayer = 'X';
+        let gameActive = true;
+
+        function renderBoard() {
+            boardElem.innerHTML = '';
+            board.forEach((cell, idx) => {
+                const cellElem = document.createElement('div');
+                cellElem.className = 'cell';
+                cellElem.textContent = cell;
+                cellElem.onclick = () => handleCellClick(idx);
+                boardElem.appendChild(cellElem);
+            });
+        }
+
+        function handleCellClick(idx) {
+            if (!gameActive || board[idx]) return;
+            board[idx] = currentPlayer;
+            renderBoard();
+            checkWinner();
+            if (gameActive) {
+                currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+                statusElem.textContent = `Player ${currentPlayer}'s turn`;
+            }
+        }
+
+        function checkWinner() {
+            const winPatterns = [
+                [0,1,2],[3,4,5],[6,7,8], // rows
+                [0,3,6],[1,4,7],[2,5,8], // cols
+                [0,4,8],[2,4,6]          // diags
+            ];
+            for (const pattern of winPatterns) {
+                const [a, b, c] = pattern;
+                if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+                    gameActive = false;
+                    highlightWinner(pattern);
+                    statusElem.textContent = `Player ${board[a]} wins!`;
+                    return;
+                }
+            }
+            if (!board.includes('')) {
+                gameActive = false;
+                statusElem.textContent = "It's a draw!";
+            }
+        }
+
+        function highlightWinner(pattern) {
+            const cells = boardElem.children;
+            pattern.forEach(idx => cells[idx].classList.add('winner'));
+        }
+
+        function resetGame() {
+            board = Array(9).fill('');
+            currentPlayer = 'X';
+            gameActive = true;
+            statusElem.textContent = `Player ${currentPlayer}'s turn`;
+            renderBoard();
+        }
+
+        // Initialize
+        resetGame();
+    </script>
+</body>
+</html>
