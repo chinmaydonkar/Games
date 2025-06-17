@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Simple Hangman Game</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; margin-top: 40px; }
+        #word { font-size: 2em; letter-spacing: 0.3em; }
+        #letters button { margin: 2px; width: 32px; height: 32px; font-size: 1em; }
+        #hangman { font-size: 1.5em; margin: 20px 0; }
+        #message { font-size: 1.2em; margin: 15px 0; color: #d33; }
+    </style>
+</head>
+<body>
+    <h1>Hangman Game</h1>
+    <div id="hangman"></div>
+    <div id="word"></div>
+    <div id="letters"></div>
+    <div id="message"></div>
+    <button onclick="startGame()">Restart</button>
+
+    <script>
+        const words = ["javascript", "hangman", "simple", "coding", "practice"];
+        let selectedWord, guessed, wrong, maxWrong = 6;
+
+        function startGame() {
+            selectedWord = words[Math.floor(Math.random() * words.length)];
+            guessed = [];
+            wrong = 0;
+            document.getElementById('message').textContent = '';
+            updateWord();
+            updateHangman();
+            createLetterButtons();
+        }
+
+        function updateWord() {
+            const display = selectedWord.split('').map(
+                letter => guessed.includes(letter) ? letter : "_"
+            ).join(' ');
+            document.getElementById('word').textContent = display;
+            if (!display.includes("_")) {
+                document.getElementById('message').textContent = "You Win!";
+                disableLetters();
+            }
+        }
+
+        function updateHangman() {
+            document.getElementById('hangman').textContent = `Wrong guesses: ${wrong} / ${maxWrong}`;
+            if (wrong >= maxWrong) {
+                document.getElementById('message').textContent = `Game Over! Word was: ${selectedWord}`;
+                disableLetters();
+            }
+        }
+
+        function createLetterButtons() {
+            const lettersDiv = document.getElementById('letters');
+            lettersDiv.innerHTML = '';
+            for (let i = 65; i <= 90; i++) {
+                const btn = document.createElement('button');
+                btn.textContent = String.fromCharCode(i);
+                btn.onclick = () => guessLetter(btn.textContent.toLowerCase(), btn);
+                lettersDiv.appendChild(btn);
+            }
+        }
+
+        function guessLetter(letter, btn) {
+            btn.disabled = true;
+            if (selectedWord.includes(letter)) {
+                guessed.push(letter);
+                updateWord();
+            } else {
+                wrong++;
+                updateHangman();
+            }
+        }
+
+        function disableLetters() {
+            document.querySelectorAll('#letters button').forEach(btn => btn.disabled = true);
+        }
+
+        startGame();
+    </script>
+</body>
+</html>
